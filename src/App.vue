@@ -150,7 +150,8 @@ const navItems = [
   { name: 'about', to: '/about', label: '关于', en: 'About' },
   { name: 'skills', to: '/skills', label: '技能', en: 'Skills' },
   { name: 'projects', to: '/projects', label: '项目', en: 'Work' },
-  { name: 'contact', to: '/contact', label: '联系', en: 'Contact' }
+  { name: 'contact', to: '/contact', label: '联系', en: 'Contact' },
+  { name: 'terminal', to: '/terminal', label: '终端', en: 'Shell' }
 ];
 
 const route = useRoute();
@@ -265,7 +266,8 @@ function closeWindow() {
   }
 
   const terminalTask = remaining.find((task) => task.name === 'terminal');
-  router.push(terminalTask?.path || remaining[remaining.length - 1]?.path || '/');
+  const fallback = window.matchMedia('(max-width: 860px)').matches ? '/about' : '/terminal';
+  router.push(terminalTask?.path || remaining[remaining.length - 1]?.path || fallback);
 }
 
 function updatePanelTime() {
@@ -327,10 +329,14 @@ onUnmounted(() => {
 <style scoped>
 .layout {
   --workspace-gap: clamp(20px, 4vh, 42px);
+  --panel-height: 34px;
   display: grid;
   grid-template-columns: minmax(260px, 300px) 1fr;
-  grid-template-rows: 34px minmax(0, 1fr);
+  grid-template-rows: var(--panel-height) minmax(0, 1fr);
+  width: 100%;
   height: 100vh;
+  height: 100dvh;
+  max-width: 100vw;
   overflow: hidden;
   background:
     radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.82), transparent 30%),
@@ -342,16 +348,20 @@ onUnmounted(() => {
   grid-row: 1;
   position: relative;
   z-index: 100;
-  height: 34px;
+  box-sizing: border-box;
+  height: var(--panel-height);
+  min-width: 0;
   padding: 0 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   color: #f4f4f1;
   background: #242522;
   font-family: 'LXGW WenKai', 'Microsoft YaHei', sans-serif;
   font-size: 0.78rem;
   user-select: none;
+  overflow: hidden;
 }
 
 .panel-group {
@@ -363,6 +373,7 @@ onUnmounted(() => {
 
 .panel-left {
   flex: 1;
+  min-width: 0;
   padding-right: 16px;
 }
 
@@ -377,8 +388,11 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 1;
   min-width: 0;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -617,8 +631,11 @@ onUnmounted(() => {
   grid-column: 2;
   grid-row: 2;
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
   padding: var(--workspace-gap) clamp(18px, 3vw, 38px) var(--workspace-gap) 18px;
 }
 
@@ -665,8 +682,12 @@ onUnmounted(() => {
 }
 
 .app-window {
+  flex: 1 1 auto;
   height: 100%;
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid rgba(22, 22, 22, 0.2);
   border-radius: 10px;
@@ -688,6 +709,7 @@ onUnmounted(() => {
 
 .window-bar {
   position: relative;
+  flex-shrink: 0;
   height: 42px;
   display: flex;
   align-items: center;
@@ -696,10 +718,12 @@ onUnmounted(() => {
   border-bottom: 1px solid #ceccc5;
   background: #e7e5df;
   user-select: none;
+  min-width: 0;
 }
 
 .window-title {
   max-width: calc(100% - 100px);
+  min-width: 0;
   overflow: hidden;
   font-size: 0.82rem;
   font-weight: 700;
@@ -764,15 +788,22 @@ onUnmounted(() => {
 }
 
 .window-content {
-  height: calc(100% - 42px);
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
   padding: clamp(34px, 6vh, 64px) clamp(24px, 5vw, 64px);
+  overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--panel);
 }
 
 .window-content :deep(.pane) {
   width: 100%;
+  max-width: 100%;
   margin-inline: auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .is-terminal .window-content {
@@ -837,13 +868,15 @@ onUnmounted(() => {
 
 @media (max-width: 860px) {
   .layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: 34px minmax(0, 1fr);
-    height: 100dvh;
+    --panel-height: calc(34px + env(safe-area-inset-top, 0px));
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--panel-height) minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
   }
 
   .top-panel {
-    height: calc(34px + env(safe-area-inset-top, 0px));
+    height: var(--panel-height);
     padding-top: env(safe-area-inset-top, 0px);
     padding-left: max(10px, env(safe-area-inset-left, 0px));
     padding-right: max(10px, env(safe-area-inset-right, 0px));
@@ -857,6 +890,7 @@ onUnmounted(() => {
 
   .panel-left {
     flex: 1;
+    min-width: 0;
     gap: 8px;
     padding-right: 0;
   }
@@ -896,11 +930,12 @@ onUnmounted(() => {
   .aside {
     position: fixed;
     left: max(8px, env(safe-area-inset-left, 0px));
-    top: calc(42px + env(safe-area-inset-top, 0px));
+    top: calc(var(--panel-height) + 8px);
     bottom: max(8px, env(safe-area-inset-bottom, 0px));
     height: auto;
     margin: 0;
-    width: min(300px, calc(100vw - 48px));
+    width: min(300px, calc(100% - 48px));
+    max-width: calc(100vw - 48px);
     transform: translateX(calc(-105% - 8px));
     transition: transform 0.28s ease;
     z-index: 90;
@@ -913,13 +948,22 @@ onUnmounted(() => {
 
   .aside-inner {
     padding: 28px 22px 20px;
+    overflow-x: hidden;
     overflow-y: auto;
+  }
+
+  .foot-link {
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
   .scrim {
     display: block;
     position: fixed;
-    inset: calc(34px + env(safe-area-inset-top, 0px)) 0 0;
+    top: var(--panel-height);
+    right: 0;
+    bottom: 0;
+    left: 0;
     background: rgba(22, 22, 22, 0.34);
     z-index: 85;
   }
@@ -927,18 +971,22 @@ onUnmounted(() => {
   .main {
     grid-column: 1;
     grid-row: 2;
-    height: auto;
+    width: 100%;
+    min-width: 0;
     min-height: 0;
+    max-width: 100%;
     padding: 8px;
     padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   }
 
   .app-window {
+    width: 100%;
+    max-width: 100%;
     border-radius: 8px;
   }
 
   .app-window.maximized {
-    inset: calc(34px + env(safe-area-inset-top, 0px)) 0 0;
+    inset: var(--panel-height) 0 0;
   }
 
   .window-bar {
@@ -947,7 +995,7 @@ onUnmounted(() => {
   }
 
   .window-title {
-    max-width: calc(100% - 92px);
+    max-width: calc(100% - 72px);
     font-size: 0.75rem;
   }
 
@@ -972,7 +1020,7 @@ onUnmounted(() => {
   }
 
   .window-content {
-    padding: 28px 18px 32px;
+    padding: 24px 16px 28px;
   }
 
   .is-terminal .window-content {
@@ -993,11 +1041,15 @@ onUnmounted(() => {
 
 @media (max-width: 480px) {
   .task-button {
-    max-width: 76px;
+    max-width: 72px;
   }
 
   .nav-en {
     display: none;
+  }
+
+  .name {
+    font-size: 1.35rem;
   }
 }
 </style>

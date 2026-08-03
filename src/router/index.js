@@ -6,11 +6,20 @@ import Projects from '../components/Projects.vue';
 import ProjectDetail from '../components/ProjectDetail.vue';
 import Contact from '../components/Contact.vue';
 
+function preferMobileHome() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 860px)').matches;
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
+      redirect: () => (preferMobileHome() ? '/about' : '/terminal')
+    },
+    {
+      path: '/terminal',
       name: 'terminal',
       component: Terminal,
       meta: {

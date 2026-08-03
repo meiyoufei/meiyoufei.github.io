@@ -54,6 +54,7 @@ const pages = {
   skills: '/skills',
   projects: '/projects',
   contact: '/contact',
+  terminal: '/terminal',
   '1': '/about',
   '2': '/skills',
   '3': '/projects',
