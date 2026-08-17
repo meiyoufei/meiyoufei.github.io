@@ -1,5 +1,10 @@
 :root,
 [data-theme='light'] {
+  /* Latin first, so CJK falls through to the platform's Chinese face. */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'HarmonyOS Sans SC',
+    'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  /* Reading text; small tracked-out labels stay on --font-sans. */
+  --font-kai: 'LXGW WenKai', var(--font-sans);
   --bg: #e4f3fd;
   --bg-2: #f6fcff;
   --ink: #0d2b40;
@@ -42,11 +47,13 @@ html {
 }
 
 body {
-  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+  font-family: var(--font-kai);
   line-height: 1.7;
   background: linear-gradient(180deg, var(--bg-2), var(--bg) 62%);
   color: var(--ink);
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {

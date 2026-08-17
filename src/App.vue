@@ -246,7 +246,8 @@ onUnmounted(() => {
   list-style: none;
   margin-top: 18px;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
 }
 
 .meta li {
@@ -289,7 +290,8 @@ h2 {
   gap: 10px;
   margin-bottom: 22px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.24em;
 }
@@ -307,8 +309,8 @@ h2::before {
 }
 
 .prose p {
-  font-size: 1.02rem;
-  line-height: 1.9;
+  font-size: 1.06rem;
+  line-height: 1.95;
 }
 
 .prose p + p {
@@ -332,7 +334,8 @@ h2::before {
   background: var(--chip);
   backdrop-filter: blur(6px);
   color: var(--ink);
-  font-size: 0.85rem;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
@@ -388,7 +391,8 @@ h2::before {
   padding-top: 22px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 0.8rem;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
 }
 
 .foot-dot {
@@ -419,7 +423,7 @@ h2::before {
   border: 0;
   background: none;
   color: var(--muted);
-  font: inherit;
+  font-family: var(--font-sans);
   font-size: 0.8rem;
   letter-spacing: 0.16em;
   cursor: pointer;
