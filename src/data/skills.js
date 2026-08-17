@@ -3,6 +3,8 @@ export const techStack = [
   { name: 'TypeScript', src: '/icons/typescript.svg', color: '#3178C6' },
   { name: 'JavaScript', src: '/icons/javascript.svg', color: '#F7DF1E' },
   { name: 'Next.js', src: '/icons/nextdotjs.svg', color: '#000000', darkColor: '#ffffff' },
+  { name: 'uni-app', src: '/icons/uni-app.svg' },
+  { name: '小程序', src: '/icons/xiaochengxu.svg', color: '#07C160' },
   { name: 'Node.js', src: '/icons/nodedotjs.svg', color: '#339933' },
   { name: 'Python', src: '/icons/python.svg', color: '#3776AB' },
   { name: 'MySQL', src: '/icons/mysql.svg', color: '#4479A1' },

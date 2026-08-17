@@ -10,21 +10,10 @@
           <h1 class="name">{{ profile.name }}</h1>
           <p class="role">{{ profile.role }}</p>
           <ul class="meta">
-            <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>
-              {{ profile.gender }} · {{ age }} 岁
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M22 10v6M2 10l10-5 10 5-10 5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-              本科
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-              {{ profile.experience }}经验
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m4 7 8 6 8-6"/></svg>
-              <a :href="`mailto:${profile.email}`">{{ profile.email }}</a>
+            <li v-for="item in metaItems" :key="item.text">
+              <span class="meta-icon" :style="maskStyle(item.icon)"></span>
+              <a v-if="item.href" :href="item.href">{{ item.text }}</a>
+              <template v-else>{{ item.text }}</template>
             </li>
           </ul>
         </div>
@@ -42,14 +31,9 @@
           <h2>技能</h2>
           <ul class="skill-list">
             <li v-for="item in techStack" :key="item.name">
-              <span
-                class="skill-icon"
-                :style="{
-                  '--icon': iconColor(item),
-                  WebkitMaskImage: `url(${item.src})`,
-                  maskImage: `url(${item.src})`
-                }"
-              ></span>
+              <!-- 多色图标直接显示原图，单色图标走遮罩以便跟随主题上色 -->
+              <img v-if="!item.color" class="skill-icon" :src="item.src" alt="" aria-hidden="true" />
+              <span v-else class="skill-icon" :style="[maskStyle(item.src), { '--icon': iconColor(item) }]"></span>
               {{ item.name }}
             </li>
           </ul>
@@ -119,6 +103,17 @@ const sections = [
   { id: 'skills', label: '技能' },
   { id: 'projects', label: '项目' }
 ];
+
+const metaItems = computed(() => [
+  { icon: '/icons/ui-user.svg', text: `${profile.gender} · ${age.value} 岁` },
+  { icon: '/icons/ui-school.svg', text: '本科' },
+  { icon: '/icons/ui-work.svg', text: `${profile.experience}经验` },
+  { icon: '/icons/ui-mail.svg', text: profile.email, href: `mailto:${profile.email}` }
+]);
+
+function maskStyle(src) {
+  return { WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` };
+}
 
 function iconColor(item) {
   if (theme.value === 'dark' && item.darkColor) return item.darkColor;
@@ -257,11 +252,12 @@ onUnmounted(() => {
   min-width: 0;
 }
 
-.meta svg {
+.meta-icon {
   width: 15px;
   height: 15px;
   flex-shrink: 0;
-  opacity: 0.75;
+  background: currentColor;
+  opacity: 0.7;
 }
 
 .meta a {
@@ -347,9 +343,22 @@ h2::before {
 .skill-icon {
   width: 17px;
   height: 17px;
+  flex-shrink: 0;
   background: var(--icon);
+}
+
+img.skill-icon {
+  background: none;
+  object-fit: contain;
+}
+
+.meta-icon,
+.skill-icon {
+  -webkit-mask-size: contain;
   mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-position: center;
   mask-position: center;
 }
 
