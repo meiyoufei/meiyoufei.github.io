@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 
 /**
  * GitHub Pages 对未知路径返回 404.html。
- * 把 SPA 的 index 复制成 404，刷新 /about、/terminal 才不会空白 404。
+ * 把 SPA 的 index 复制成 404，避免刷新后空白。
  */
 function spaFallbackForGitHubPages() {
   return {

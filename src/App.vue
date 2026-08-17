@@ -1,1055 +1,553 @@
 <template>
-  <div class="layout">
-    <header class="top-panel">
-      <div class="panel-group panel-left">
-        <button
-          type="button"
-          class="menu-toggle"
-          :aria-expanded="menuOpen"
-          aria-label="打开菜单"
-          @click="menuOpen = !menuOpen"
-        >
-          <span></span>
-          <span></span>
-        </button>
-        <span class="activities">活动</span>
-        <div class="task-list" aria-label="已打开窗口">
-          <button
-            v-for="task in openTasks"
-            :key="task.id"
-            type="button"
-            class="task-button"
-            :class="{ active: isTaskActive(task) }"
-            :title="task.windowTitle"
-            @click="activateTask(task)"
-          >
-            <span class="task-dot"></span>
-            {{ task.shortLabel }}
-          </button>
+  <div class="app">
+    <BackgroundCanvas :theme="theme" />
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="shell">
+      <header class="profile">
+        <img class="avatar" :src="profile.avatar" :alt="profile.name" width="88" height="88" />
+        <div class="profile-body">
+          <h1 class="name">{{ profile.name }}</h1>
+          <p class="role">{{ profile.role }}</p>
+          <ul class="meta">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>
+              {{ profile.gender }} · {{ age }} 岁
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M22 10v6M2 10l10-5 10 5-10 5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              本科
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              {{ profile.experience }}经验
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m4 7 8 6 8-6"/></svg>
+              <a :href="`mailto:${profile.email}`">{{ profile.email }}</a>
+            </li>
+          </ul>
         </div>
-      </div>
-      <strong class="panel-time">{{ panelTime }}</strong>
-      <div class="panel-group system-status" aria-label="系统状态">
-        <span>◉</span>
-        <span>⌁</span>
-        <span>▰</span>
-      </div>
-    </header>
+      </header>
 
-    <aside class="aside" :class="{ open: menuOpen }">
-      <div class="aside-inner">
-        <header class="profile">
-          <img class="avatar" src="/images/avatar.gif" alt="梅友飞" width="60" height="60" />
-          <div class="profile-text">
-            <h1 class="name">梅友飞</h1>
-            <p class="role">全栈开发工程师</p>
+      <main class="main">
+        <section id="about" class="block">
+          <h2>个人介绍</h2>
+          <div class="prose">
+            <p v-for="(line, index) in profile.intro" :key="index">{{ line }}</p>
           </div>
-        </header>
+        </section>
 
-        <p class="tagline">前端为主，全栈落地。</p>
+        <section id="skills" class="block">
+          <h2>技能</h2>
+          <ul class="skill-list">
+            <li v-for="item in techStack" :key="item.name">
+              <span
+                class="skill-icon"
+                :style="{
+                  '--icon': iconColor(item),
+                  WebkitMaskImage: `url(${item.src})`,
+                  maskImage: `url(${item.src})`
+                }"
+              ></span>
+              {{ item.name }}
+            </li>
+          </ul>
+        </section>
 
-        <nav class="nav" aria-label="主导航">
-          <RouterLink
-            v-for="item in navItems"
-            :key="item.name"
-            :to="item.to"
-            class="nav-btn"
-            :class="{ active: isActive(item) }"
-            @click="openFromNavigation"
-          >
-            <span class="nav-line" aria-hidden="true"></span>
-            <span class="nav-label">{{ item.label }}</span>
-            <span class="nav-en" aria-hidden="true">{{ item.en }}</span>
-          </RouterLink>
-        </nav>
+        <section id="projects" class="block">
+          <h2>项目</h2>
+          <ul class="project-list">
+            <li v-for="project in allProjects" :key="project.id">
+              <strong>{{ project.title }}</strong>
+              <span>{{ project.summary }}</span>
+            </li>
+          </ul>
+        </section>
+      </main>
 
-        <footer class="aside-foot">
-          <a href="mailto:18737582236@163.com" class="foot-link">
-            18737582236@163.com
-          </a>
-          <span class="foot-copyright">© {{ year }} · Build. Ship. Iterate.</span>
-        </footer>
-      </div>
-    </aside>
+      <footer class="foot">
+        <span>更新于 {{ profile.lastUpdated }}</span>
+        <span class="foot-dot" aria-hidden="true"></span>
+        <span>{{ profile.name }}</span>
+      </footer>
+    </div>
 
-    <div v-if="menuOpen" class="scrim" @click="menuOpen = false"></div>
-
-    <main class="main">
+    <nav class="rail" aria-label="页面导航">
       <button
-        v-if="!isWindowOpen"
+        v-for="item in sections"
+        :key="item.id"
         type="button"
-        class="desktop-launcher"
-        aria-label="重新打开 Portfolio 窗口"
-        @click="restoreWindow"
+        class="rail-link"
+        :class="{ active: activeSection === item.id }"
+        @click="goTo(item.id)"
       >
-        <span class="launcher-icon">⌘</span>
-        <span>Portfolio</span>
+        {{ item.label }}
       </button>
+    </nav>
 
-      <p v-if="isMinimized" class="desktop-hint">窗口已最小化，可从顶部任务栏恢复。</p>
-
-      <section
-        v-show="isWindowVisible"
-        class="app-window"
-        :class="{ 'is-terminal': isTerminal, maximized: isMaximized }"
-      >
-        <header class="window-bar">
-          <strong class="window-title">{{ windowTitle }}</strong>
-          <div class="window-controls">
-            <button
-              type="button"
-              class="window-control minimize"
-              aria-label="最小化窗口"
-              title="最小化"
-              @click="minimizeWindow"
-            >
-              <span class="control-icon">−</span>
-            </button>
-            <button
-              type="button"
-              class="window-control maximize"
-              :aria-label="isMaximized ? '还原窗口' : '全屏窗口'"
-              :title="isMaximized ? '还原' : '全屏'"
-              @click="toggleMaximize"
-            >
-              <span class="control-icon">{{ isMaximized ? '❐' : '□' }}</span>
-            </button>
-            <button
-              type="button"
-              class="window-control close"
-              :aria-label="isTerminal ? '关闭终端窗口' : '关闭当前窗口并返回终端'"
-              title="关闭"
-              @click="closeWindow"
-            >
-              <span class="control-icon">×</span>
-            </button>
-          </div>
-        </header>
-
-        <div ref="windowContent" class="window-content">
-          <RouterView v-slot="{ Component, route: viewRoute }">
-            <transition name="pane" mode="out-in">
-              <component :is="Component" :key="viewRoute.fullPath" />
-            </transition>
-          </RouterView>
-        </div>
-      </section>
-    </main>
+    <button
+      type="button"
+      class="theme-toggle"
+      :aria-label="theme === 'dark' ? '切换到亮色' : '切换到暗色'"
+      @click="toggleTheme"
+    >
+      <svg v-if="theme === 'dark'" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0 4a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1ZM12 4a1 1 0 0 1-1-1V2a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm8 9h1a1 1 0 1 1 0 2h-1a1 1 0 1 1 0-2ZM3 13H2a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2Zm14.66 5.66.7.7a1 1 0 0 1-1.41 1.42l-.7-.71a1 1 0 0 1 1.41-1.41ZM6.34 5.34l-.7-.7A1 1 0 0 1 7.05 3.2l.7.7a1 1 0 1 1-1.41 1.42Zm12.02-1.42.7-.7a1 1 0 1 1 1.42 1.41l-.71.7a1 1 0 0 1-1.41-1.41ZM5.34 17.66l-.7.7a1 1 0 1 1-1.42-1.41l.71-.7a1 1 0 0 1 1.41 1.41Z" />
+      </svg>
+      <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M21 14.3A8.4 8.4 0 0 1 9.7 3 8.5 8.5 0 1 0 21 14.3Z" />
+      </svg>
+    </button>
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch, onMounted, onUnmounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { createCursorTrail } from './utils/bubbleCursor.js';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { calcAge, profile } from './data/profile.js';
+import { techStack } from './data/skills.js';
+import { allProjects } from './data/projects.js';
+import { useTheme } from './composables/useTheme.js';
+import BackgroundCanvas from './components/BackgroundCanvas.vue';
 
-// 鼠标特效切换：'bubble' 气泡 | 'image' 图片轨迹
-const CURSOR_TRAIL_MODE = 'bubble';
+const { theme, toggleTheme } = useTheme();
+const activeSection = ref('about');
+const age = computed(() => calcAge());
 
-const navItems = [
-  { name: 'about', to: '/about', label: '关于', en: 'About' },
-  { name: 'skills', to: '/skills', label: '技能', en: 'Skills' },
-  { name: 'projects', to: '/projects', label: '项目', en: 'Work' },
-  { name: 'contact', to: '/contact', label: '联系', en: 'Contact' },
-  { name: 'terminal', to: '/terminal', label: '终端', en: 'Shell' }
+const sections = [
+  { id: 'about', label: '介绍' },
+  { id: 'skills', label: '技能' },
+  { id: 'projects', label: '项目' }
 ];
 
-const route = useRoute();
-const router = useRouter();
-const menuOpen = ref(false);
-const windowContent = ref(null);
-const isWindowOpen = ref(true);
-const isMinimized = ref(false);
-const isMaximized = ref(false);
-const panelTime = ref('');
-const openTasks = ref([]);
-const year = new Date().getFullYear();
-let cursorTrail = null;
-let clockTimer = null;
-const isTerminal = computed(() => route.name === 'terminal');
-const isWindowVisible = computed(() => isWindowOpen.value && !isMinimized.value);
-const windowTitle = computed(() => route.meta.windowTitle || 'portfolio — 个人主页');
+function iconColor(item) {
+  if (theme.value === 'dark' && item.darkColor) return item.darkColor;
+  return item.color;
+}
 
-function taskIdFromRoute(target = route) {
-  if (target.name === 'project-detail') {
-    return `project:${target.params.id}`;
+function goTo(id) {
+  activeSection.value = id;
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateActive() {
+  const probe = 140;
+  let current = sections[0].id;
+  for (const item of sections) {
+    const el = document.getElementById(item.id);
+    if (el && el.getBoundingClientRect().top <= probe) current = item.id;
   }
-  return String(target.name || target.path);
+  activeSection.value = current;
 }
-
-function createTaskFromRoute(target = route) {
-  return {
-    id: taskIdFromRoute(target),
-    name: target.name,
-    path: target.fullPath,
-    shortLabel: target.meta.shortLabel || target.meta.title || 'Window',
-    windowTitle: target.meta.windowTitle || target.meta.title || 'portfolio'
-  };
-}
-
-function ensureTask(target = route) {
-  if (!target.name || target.name === undefined) return;
-  const next = createTaskFromRoute(target);
-  const index = openTasks.value.findIndex((task) => task.id === next.id);
-  if (index === -1) {
-    openTasks.value.push(next);
-  } else {
-    openTasks.value[index] = next;
-  }
-}
-
-function isTaskActive(task) {
-  return isWindowVisible.value && task.id === taskIdFromRoute(route);
-}
-
-function isActive(item) {
-  if (item.name === 'projects') {
-    return route.path.startsWith('/projects');
-  }
-  return route.path === item.to;
-}
-
-function openFromNavigation() {
-  menuOpen.value = false;
-  isWindowOpen.value = true;
-  isMinimized.value = false;
-}
-
-function minimizeWindow() {
-  isMinimized.value = true;
-  isMaximized.value = false;
-}
-
-function restoreWindow() {
-  isWindowOpen.value = true;
-  isMinimized.value = false;
-  ensureTask(route);
-}
-
-function activateTask(task) {
-  const isCurrent = task.id === taskIdFromRoute(route);
-
-  if (!isWindowOpen.value || isMinimized.value) {
-    restoreWindow();
-    if (!isCurrent) {
-      router.push(task.path);
-    }
-    return;
-  }
-
-  if (isCurrent) {
-    minimizeWindow();
-    return;
-  }
-
-  router.push(task.path);
-}
-
-function toggleMaximize() {
-  isMaximized.value = !isMaximized.value;
-}
-
-function closeWindow() {
-  isMaximized.value = false;
-  const currentId = taskIdFromRoute(route);
-  const remaining = openTasks.value.filter((task) => task.id !== currentId);
-  openTasks.value = remaining;
-
-  if (isTerminal.value) {
-    if (remaining.length) {
-      router.push(remaining[remaining.length - 1].path);
-      return;
-    }
-    isWindowOpen.value = false;
-    isMinimized.value = false;
-    return;
-  }
-
-  const terminalTask = remaining.find((task) => task.name === 'terminal');
-  const fallback = window.matchMedia('(max-width: 860px)').matches ? '/about' : '/terminal';
-  router.push(terminalTask?.path || remaining[remaining.length - 1]?.path || fallback);
-}
-
-function updatePanelTime() {
-  panelTime.value = new Intl.DateTimeFormat('zh-CN', {
-    month: 'long',
-    day: 'numeric',
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date());
-}
-
-watch(
-  () => route.fullPath,
-  async () => {
-    if (isWindowOpen.value) {
-      ensureTask(route);
-      isMinimized.value = false;
-    }
-    await nextTick();
-    windowContent.value?.scrollTo({ top: 0, behavior: 'auto' });
-  },
-  { immediate: true }
-);
 
 onMounted(() => {
-  updatePanelTime();
-  clockTimer = window.setInterval(updatePanelTime, 30000);
-
-  const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
-  const narrowScreen = window.matchMedia('(max-width: 860px)').matches;
-  if (coarsePointer || narrowScreen) return;
-
-  cursorTrail = createCursorTrail(
-    CURSOR_TRAIL_MODE === 'image'
-      ? {
-          mode: 'image',
-          imageSrc: '/images/tongluoshao.svg',
-          size: 28,
-          minDistance: 28,
-          maxParticles: 16,
-          spawnChance: 0.65
-        }
-      : {
-          mode: 'bubble',
-          minDistance: 6,
-          maxParticles: 28,
-          spawnChance: 0.75
-        }
-  );
+  updateActive();
+  window.addEventListener('scroll', updateActive, { passive: true });
 });
 
 onUnmounted(() => {
-  window.clearInterval(clockTimer);
-  cursorTrail?.destroy();
+  window.removeEventListener('scroll', updateActive);
 });
 </script>
 
 <style scoped>
-.layout {
-  --workspace-gap: clamp(20px, 4vh, 42px);
-  --panel-height: 34px;
-  display: grid;
-  grid-template-columns: minmax(260px, 300px) 1fr;
-  grid-template-rows: var(--panel-height) minmax(0, 1fr);
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  max-width: 100vw;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.82), transparent 30%),
-    var(--bg);
-}
-
-.top-panel {
-  grid-column: 1 / -1;
-  grid-row: 1;
+.app {
   position: relative;
-  z-index: 100;
-  box-sizing: border-box;
-  height: var(--panel-height);
-  min-width: 0;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  color: #f4f4f1;
-  background: #242522;
-  font-family: 'LXGW WenKai', 'Microsoft YaHei', sans-serif;
-  font-size: 0.78rem;
-  user-select: none;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-.panel-group {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--grain);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.55'/></svg>");
 }
 
-.panel-left {
-  flex: 1;
-  min-width: 0;
-  padding-right: 16px;
-}
-
-.activities {
-  flex-shrink: 0;
-  padding: 2px 9px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.task-list {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.task-list::-webkit-scrollbar {
-  display: none;
-}
-
-.task-button {
-  flex-shrink: 0;
-  max-width: 148px;
-  padding: 2px 8px;
-  overflow: hidden;
-  border: 0;
-  border-radius: 4px;
-  color: #c7cbc4;
-  background: transparent;
-  font: inherit;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.task-button:hover,
-.task-button.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.task-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin-right: 5px;
-  border-radius: 50%;
-  background: #74c486;
-  vertical-align: middle;
-}
-
-.task-button:not(.active) .task-dot {
-  background: #777b75;
-}
-
-.panel-time {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-}
-
-.system-status {
-  font-family: monospace;
-}
-
-.aside {
-  grid-column: 1;
-  grid-row: 2;
+.shell {
   position: relative;
-  height: auto;
-  min-height: 0;
-  margin: var(--workspace-gap) 0 var(--workspace-gap) clamp(18px, 3vw, 38px);
-  overflow: hidden;
-  border: 1px solid rgba(22, 22, 22, 0.16);
-  border-radius: 10px;
-  background: var(--bg);
-  box-shadow: 0 18px 50px rgba(31, 32, 29, 0.13);
-  z-index: 20;
+  z-index: 2;
+  width: min(720px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 96px 0 104px;
 }
 
-.aside-inner {
-  height: 100%;
-  padding: clamp(32px, 5vh, 48px) 30px 26px;
-  display: flex;
-  flex-direction: column;
+.profile,
+.block,
+.foot {
+  animation: rise 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-/* ---- profile ---- */
+.block:nth-of-type(1) {
+  animation-delay: 0.07s;
+}
+
+.block:nth-of-type(2) {
+  animation-delay: 0.14s;
+}
+
+.block:nth-of-type(3) {
+  animation-delay: 0.21s;
+}
+
+.foot {
+  animation-delay: 0.28s;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
 .profile {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 26px;
+  gap: 26px;
+  margin-bottom: 72px;
 }
 
 .avatar {
-  width: 60px;
-  height: 60px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   object-fit: cover;
-  background: var(--panel);
-  box-shadow: 0 0 0 1px var(--line), 0 6px 16px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
+  background: var(--chip);
+  box-shadow: 0 0 0 5px var(--ring), 0 12px 32px rgba(13, 43, 64, 0.12);
+}
+
+.profile-body {
+  min-width: 0;
+  flex: 1;
 }
 
 .name {
   font-size: 1.6rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   line-height: 1.2;
 }
 
 .role {
+  margin-top: 2px;
   color: var(--muted);
   font-size: 0.95rem;
-  margin-top: 2px;
 }
 
-.tagline {
+.meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 7px 30px;
+  list-style: none;
+  margin-top: 18px;
   color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.85;
-  padding-bottom: 30px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  font-size: 0.86rem;
 }
 
-/* ---- nav ---- */
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  padding-top: 10px;
-}
-
-.nav-btn {
-  appearance: none;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+.meta li {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 13px 4px;
-  color: var(--muted);
-  text-align: left;
-  text-decoration: none;
-  transition: color 0.25s ease;
-}
-
-.nav-line {
-  width: 22px;
-  height: 1.5px;
-  background: currentColor;
-  opacity: 0.45;
-  flex-shrink: 0;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
-}
-
-.nav-label {
-  font-size: 1.15rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  transition: letter-spacing 0.3s ease;
-}
-
-.nav-en {
-  margin-left: auto;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.nav-btn:hover {
-  color: var(--ink);
-}
-
-.nav-btn:hover .nav-line {
-  width: 34px;
-  opacity: 0.8;
-}
-
-.nav-btn:hover .nav-en {
-  opacity: 0.4;
-  transform: translateX(0);
-}
-
-.nav-btn.active {
-  color: var(--ink);
-}
-
-.nav-btn.active .nav-line {
-  width: 48px;
-  opacity: 1;
-  height: 2px;
-  background: var(--accent);
-}
-
-.nav-btn.active .nav-label {
-  letter-spacing: 0.2em;
-  font-weight: 700;
-}
-
-.nav-btn.active .nav-en {
-  opacity: 0.7;
-  transform: translateX(0);
-  color: var(--accent);
-}
-
-/* ---- footer ---- */
-.aside-foot {
-  margin-top: auto;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
-.foot-link {
-  color: var(--ink);
-  font-size: 0.85rem;
-  text-decoration: none;
-  letter-spacing: 0.02em;
-  transition: color 0.2s ease;
-  width: fit-content;
-  border-bottom: 1px solid transparent;
-}
-
-.foot-link:hover {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
-.foot-copyright {
-  color: var(--muted);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+.meta svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
   opacity: 0.75;
 }
 
-/* ---- main ---- */
+.meta a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.meta a:hover {
+  color: var(--accent);
+  border-bottom-color: currentColor;
+}
+
 .main {
-  grid-column: 2;
-  grid-row: 2;
-  position: relative;
-  display: flex;
-  flex-direction: column;
   min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  padding: var(--workspace-gap) clamp(18px, 3vw, 38px) var(--workspace-gap) 18px;
 }
 
-.desktop-launcher {
-  position: absolute;
-  top: var(--workspace-gap);
-  left: 34px;
-  display: grid;
-  justify-items: center;
-  gap: 7px;
-  padding: 10px;
-  border: 0;
-  border-radius: 7px;
-  color: var(--ink);
-  background: transparent;
-  font-family: inherit;
-  cursor: pointer;
+.block {
+  scroll-margin-top: 40px;
+  padding-bottom: 64px;
 }
 
-.desktop-launcher:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.launcher-icon {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  color: #fff;
-  background: #356a54;
-  font: 700 1.4rem monospace;
-  box-shadow: 0 8px 20px rgba(31, 32, 29, 0.16);
-}
-
-.desktop-hint {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.85rem;
-  transform: translate(-50%, -50%);
-}
-
-.app-window {
-  flex: 1 1 auto;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid rgba(22, 22, 22, 0.2);
-  border-radius: 10px;
-  background: var(--panel);
-  box-shadow: 0 24px 64px rgba(31, 32, 29, 0.18);
-  transition: border-radius 0.18s ease, box-shadow 0.18s ease;
-}
-
-.app-window.maximized {
-  position: fixed;
-  inset: 34px 0 0;
-  z-index: 80;
-  width: auto;
-  height: auto;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.window-bar {
-  position: relative;
-  flex-shrink: 0;
-  height: 42px;
+h2 {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  border-bottom: 1px solid #ceccc5;
-  background: #e7e5df;
-  user-select: none;
-  min-width: 0;
-}
-
-.window-title {
-  max-width: calc(100% - 100px);
-  min-width: 0;
-  overflow: hidden;
-  font-size: 0.82rem;
+  gap: 10px;
+  margin-bottom: 22px;
+  color: var(--muted);
+  font-size: 0.78rem;
   font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  letter-spacing: 0.24em;
 }
 
-.window-controls {
-  position: absolute;
-  right: 13px;
+h2::before {
+  content: '';
+  width: 16px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.prose {
+  max-width: 34em;
+}
+
+.prose p {
+  font-size: 1.02rem;
+  line-height: 1.9;
+}
+
+.prose p + p {
+  margin-top: 14px;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+}
+
+.skill-list li {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--chip);
+  backdrop-filter: blur(6px);
+  color: var(--ink);
+  font-size: 0.85rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.window-control {
-  width: 13px;
-  height: 13px;
+.skill-list li:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.skill-icon {
+  width: 17px;
+  height: 17px;
+  background: var(--icon);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.project-list {
+  list-style: none;
+  margin-left: -12px;
+}
+
+.project-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+  gap: 4px 22px;
+  align-items: baseline;
+  padding: 11px 12px;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.project-list li:hover {
+  background: var(--chip);
+}
+
+.project-list strong {
+  font-size: 0.98rem;
+  font-weight: 650;
+}
+
+.project-list span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.foot-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.rail {
+  position: fixed;
+  top: 50%;
+  left: calc(50% + 360px + 56px);
+  z-index: 30;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.rail-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.rail-link::before {
+  content: '';
+  width: 14px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.45;
+  transition: width 0.25s ease, opacity 0.25s ease, background 0.25s ease;
+}
+
+.rail-link:hover {
+  color: var(--ink);
+}
+
+.rail-link.active {
+  color: var(--ink);
+}
+
+.rail-link.active::before {
+  width: 30px;
+  opacity: 1;
+  background: var(--accent);
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  z-index: 30;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
-  color: rgba(30, 30, 28, 0.78);
-  font-family: Arial, sans-serif;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--chip);
+  backdrop-filter: blur(8px);
+  color: var(--ink);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.2s ease;
 }
 
-.window-control.minimize {
-  background: #e7b94c;
+.theme-toggle:hover {
+  transform: translateY(-1px);
 }
 
-.window-control.maximize {
-  background: #62ad69;
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
 }
 
-.window-control.close {
-  background: #d9655d;
-}
-
-.window-control:hover {
-  transform: scale(1.15);
-}
-
-.window-control.close:hover {
-  box-shadow: 0 0 0 3px rgba(217, 101, 93, 0.18);
-}
-
-.control-icon {
-  opacity: 0;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-  transform: translateY(-0.3px);
-  transition: opacity 0.12s ease;
-}
-
-.window-controls:hover .control-icon,
-.window-control:focus-visible .control-icon {
-  opacity: 1;
-}
-
-.window-content {
-  flex: 1 1 auto;
-  min-height: 0;
-  min-width: 0;
-  padding: clamp(34px, 6vh, 64px) clamp(24px, 5vw, 64px);
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  background: var(--panel);
-}
-
-.window-content :deep(.pane) {
-  width: 100%;
-  max-width: 100%;
-  margin-inline: auto;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.is-terminal .window-content {
-  padding: 0;
-  background: #242723;
-}
-
-.pane-enter-active,
-.pane-leave-active {
-  transition: opacity 0.22s ease, transform 0.22s ease;
-}
-
-.pane-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.pane-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.menu-toggle,
-.scrim {
-  display: none;
-}
-
-@media (max-height: 650px) and (min-width: 861px) {
-  .aside-inner {
-    padding-top: 24px;
-    padding-bottom: 18px;
+@media (max-width: 1180px) {
+  .shell {
+    width: min(720px, calc(100% - 40px));
+    padding: 64px 0 108px;
   }
 
+  .rail {
+    left: auto;
+    right: 20px;
+    top: auto;
+    bottom: 20px;
+    transform: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+    padding: 9px 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--chip);
+    backdrop-filter: blur(10px);
+  }
+
+  .rail-link {
+    letter-spacing: 0.1em;
+  }
+
+  .rail-link::before {
+    display: none;
+  }
+
+  .rail-link.active {
+    color: var(--accent);
+    font-weight: 650;
+  }
+}
+
+@media (max-width: 560px) {
   .profile {
-    margin-bottom: 16px;
+    gap: 18px;
+    margin-bottom: 52px;
   }
 
   .avatar {
-    width: 52px;
-    height: 52px;
-  }
-
-  .tagline {
-    padding-bottom: 16px;
-    margin-bottom: 2px;
-  }
-
-  .nav {
-    padding-top: 4px;
-  }
-
-  .nav-btn {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .aside-foot {
-    padding-top: 12px;
-    gap: 4px;
-  }
-}
-
-@media (max-width: 860px) {
-  .layout {
-    --panel-height: calc(34px + env(safe-area-inset-top, 0px));
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: var(--panel-height) minmax(0, 1fr);
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .top-panel {
-    height: var(--panel-height);
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-left: max(10px, env(safe-area-inset-left, 0px));
-    padding-right: max(10px, env(safe-area-inset-right, 0px));
-  }
-
-  .activities,
-  .system-status,
-  .panel-time {
-    display: none;
-  }
-
-  .panel-left {
-    flex: 1;
-    min-width: 0;
-    gap: 8px;
-    padding-right: 0;
-  }
-
-  .menu-toggle {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 4px;
-    flex-shrink: 0;
-    width: 28px;
-    height: 28px;
-    border: 0;
-    border-radius: 5px;
-    background: rgba(255, 255, 255, 0.1);
-    cursor: pointer;
-    padding: 0 7px;
-  }
-
-  .menu-toggle span {
-    display: block;
-    height: 1.5px;
-    background: #f4f4f1;
-    border-radius: 2px;
-  }
-
-  .task-list {
-    gap: 4px;
-  }
-
-  .task-button {
-    max-width: 88px;
-    padding: 3px 7px;
-    font-size: 0.72rem;
-  }
-
-  .aside {
-    position: fixed;
-    left: max(8px, env(safe-area-inset-left, 0px));
-    top: calc(var(--panel-height) + 8px);
-    bottom: max(8px, env(safe-area-inset-bottom, 0px));
-    height: auto;
-    margin: 0;
-    width: min(300px, calc(100% - 48px));
-    max-width: calc(100vw - 48px);
-    transform: translateX(calc(-105% - 8px));
-    transition: transform 0.28s ease;
-    z-index: 90;
-  }
-
-  .aside.open {
-    transform: translateX(0);
-    box-shadow: 16px 0 48px rgba(0, 0, 0, 0.18);
-  }
-
-  .aside-inner {
-    padding: 28px 22px 20px;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  .foot-link {
-    max-width: 100%;
-    overflow-wrap: anywhere;
-  }
-
-  .scrim {
-    display: block;
-    position: fixed;
-    top: var(--panel-height);
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(22, 22, 22, 0.34);
-    z-index: 85;
-  }
-
-  .main {
-    grid-column: 1;
-    grid-row: 2;
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
-    max-width: 100%;
-    padding: 8px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
-  }
-
-  .app-window {
-    width: 100%;
-    max-width: 100%;
-    border-radius: 8px;
-  }
-
-  .app-window.maximized {
-    inset: var(--panel-height) 0 0;
-  }
-
-  .window-bar {
-    height: 40px;
-    padding: 0 10px;
-  }
-
-  .window-title {
-    max-width: calc(100% - 72px);
-    font-size: 0.75rem;
-  }
-
-  .window-controls {
-    right: 10px;
-    gap: 10px;
-  }
-
-  .window-control {
-    width: 16px;
-    height: 16px;
-  }
-
-  .control-icon,
-  .window-controls:hover .control-icon {
-    opacity: 1;
-    font-size: 11px;
-  }
-
-  .window-control.maximize {
-    display: none;
-  }
-
-  .window-content {
-    padding: 24px 16px 28px;
-  }
-
-  .is-terminal .window-content {
-    padding: 0;
-  }
-
-  .desktop-launcher {
-    left: 18px;
-    top: 18px;
-  }
-
-  .desktop-hint {
-    width: min(80vw, 280px);
-    text-align: center;
-    line-height: 1.6;
-  }
-}
-
-@media (max-width: 480px) {
-  .task-button {
-    max-width: 72px;
-  }
-
-  .nav-en {
-    display: none;
+    width: 72px;
+    height: 72px;
   }
 
   .name {
     font-size: 1.35rem;
+  }
+
+  .meta {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .block {
+    padding-bottom: 48px;
+  }
+
+  .project-list li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile,
+  .block,
+  .foot {
+    animation: none;
   }
 }
 </style>

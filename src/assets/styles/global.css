@@ -1,13 +1,26 @@
-:root {
-  --bg: #f3f2ee;
-  --panel: #ffffff;
-  --ink: #161616;
-  --muted: #6e6e6e;
-  --line: #e3e1d9;
-  --soft: #f0eee8;
-  --accent: #2a5f8f;
-  --accent-soft: rgba(42, 95, 143, 0.1);
-  --radius: 8px;
+:root,
+[data-theme='light'] {
+  --bg: #e4f3fd;
+  --bg-2: #f6fcff;
+  --ink: #0d2b40;
+  --muted: #55788f;
+  --line: rgba(13, 43, 64, 0.14);
+  --accent: #0086cc;
+  --chip: rgba(255, 255, 255, 0.7);
+  --ring: rgba(255, 255, 255, 0.6);
+  --grain: 0.2;
+}
+
+[data-theme='dark'] {
+  --bg: #08192a;
+  --bg-2: #0e2c46;
+  --ink: #e6f3fb;
+  --muted: #8db0c8;
+  --line: rgba(230, 243, 251, 0.14);
+  --accent: #5cc9f5;
+  --chip: rgba(255, 255, 255, 0.07);
+  --ring: rgba(255, 255, 255, 0.1);
+  --grain: 0.14;
 }
 
 * {
@@ -19,23 +32,21 @@
 html,
 body,
 #app {
-  width: 100%;
-  max-width: 100%;
   min-height: 100%;
-  height: 100%;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: 'LXGW WenKai', 'LXGW WenKai Lite', 'PingFang SC', 'Microsoft YaHei', serif;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
   line-height: 1.7;
-  overflow: hidden;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg) 62%);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
-}
-
-#app {
-  overflow: hidden;
 }
 
 a {
@@ -43,23 +54,23 @@ a {
   text-underline-offset: 3px;
 }
 
+::selection {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
 button {
   font-family: inherit;
+}
+
+img {
+  max-width: 100%;
 }
 
 ::-webkit-scrollbar {
   width: 8px;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 ::-webkit-scrollbar-thumb {
-  background: #cfcbc0;
+  background: color-mix(in srgb, var(--ink) 22%, transparent);
   border-radius: 999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #b8b3a6;
 }
