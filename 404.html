@@ -4,9 +4,20 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="/images/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>梅友飞 - 全栈/前端开发工程师</title>
-    <script type="module" crossorigin src="/assets/index-a0e68118.js"></script>
-    <link rel="stylesheet" href="/assets/index-8c61dfaf.css">
+    <title>梅友飞</title>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var theme = saved === 'dark' || saved === 'light'
+            ? saved
+            : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.dataset.theme = theme;
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-7ea439e8.js"></script>
+    <link rel="stylesheet" href="/assets/index-55b3475b.css">
   </head>
   <body>
     <div id="app"></div>
