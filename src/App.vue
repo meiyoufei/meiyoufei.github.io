@@ -30,11 +30,18 @@
         <section id="skills" class="block">
           <h2>技能</h2>
           <ul class="skill-list">
-            <li v-for="item in techStack" :key="item.name">
-              <!-- 多色图标直接显示原图，单色图标走遮罩以便跟随主题上色 -->
-              <img v-if="!item.color" class="skill-icon" :src="item.src" alt="" aria-hidden="true" />
-              <span v-else class="skill-icon" :style="[maskStyle(item.src), { '--icon': iconColor(item) }]"></span>
-              {{ item.name }}
+            <li v-for="group in skillGroups" :key="group.category" class="skill-row">
+              <strong class="skill-category">{{ group.category }}</strong>
+              <span class="skill-items">
+                <template v-for="(item, index) in group.items" :key="item.name">
+                  <span v-if="index > 0" class="skill-sep" aria-hidden="true">·</span>
+                  <span class="skill-item">
+                    <img v-if="!item.color" class="skill-icon" :src="item.src" alt="" aria-hidden="true" />
+                    <span v-else class="skill-icon" :style="[maskStyle(item.src), { '--icon': iconColor(item) }]"></span>
+                    {{ item.name }}
+                  </span>
+                </template>
+              </span>
             </li>
           </ul>
         </section>
@@ -89,7 +96,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { calcAge, profile } from './data/profile.js';
-import { techStack } from './data/skills.js';
+import { skillGroups } from './data/skills.js';
 import { allProjects } from './data/projects.js';
 import { useTheme } from './composables/useTheme.js';
 import BackgroundCanvas from './components/BackgroundCanvas.vue';
@@ -287,14 +294,14 @@ h2 {
   margin-bottom: 22px;
   color: var(--muted);
   font-family: var(--font-sans);
-  font-size: 0.76rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.2em;
 }
 
 h2::before {
   content: '';
-  width: 16px;
+  width: 18px;
   height: 2px;
   border-radius: 2px;
   background: var(--accent);
@@ -314,35 +321,53 @@ h2::before {
 }
 
 .skill-list {
+  list-style: none;
+  margin-left: -12px;
+}
+
+.skill-row {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+  gap: 4px 22px;
+  align-items: baseline;
+  padding: 11px 12px;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.skill-row:hover {
+  background: var(--chip);
+}
+
+.skill-category {
+  font-size: 0.98rem;
+  font-weight: 650;
+}
+
+.skill-items {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-}
-
-.skill-list li {
-  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 13px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--chip);
-  backdrop-filter: blur(6px);
-  color: var(--ink);
+  color: var(--muted);
   font-family: var(--font-sans);
-  font-size: 0.84rem;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  font-size: 0.9rem;
+  line-height: 1.7;
 }
 
-.skill-list li:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
+.skill-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.skill-sep {
+  margin: 0 8px;
+  opacity: 0.45;
 }
 
 .skill-icon {
-  width: 17px;
-  height: 17px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
   background: var(--icon);
 }
@@ -550,6 +575,7 @@ img.skill-icon {
     padding-bottom: 48px;
   }
 
+  .skill-row,
   .project-list li {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
