@@ -1,25 +1,53 @@
 <template>
-  <div class="app">
-    <BackgroundCanvas :theme="theme" />
+  <div class="desk">
     <div class="grain" aria-hidden="true"></div>
 
-    <div class="shell">
-      <header class="profile">
-        <img class="avatar" :src="profile.avatar" :alt="profile.name" width="88" height="88" />
-        <div class="profile-body">
-          <h1 class="name">{{ profile.name }}</h1>
-          <p class="role">{{ profile.role }}</p>
-          <ul class="meta">
-            <li v-for="item in metaItems" :key="item.text">
-              <span class="meta-icon" :style="maskStyle(item.icon)"></span>
-              <a v-if="item.href" :href="item.href">{{ item.text }}</a>
-              <template v-else>{{ item.text }}</template>
-            </li>
-          </ul>
-        </div>
-      </header>
+    <button type="button" class="theme-fab" :aria-label="theme === 'dark' ? '切换到亮色' : '切换到暗色'" @click="toggleTheme">
+      {{ theme === 'dark' ? '亮色' : '暗色' }}
+    </button>
 
-      <main class="main">
+    <div class="layout">
+      <aside class="pad">
+        <div class="clip" aria-hidden="true">
+          <span class="clip-top"></span>
+          <span class="clip-body"></span>
+        </div>
+        <p class="pad-kicker">目录</p>
+        <nav class="pad-nav" aria-label="页面导航">
+          <button
+            v-for="item in sections"
+            :key="item.id"
+            type="button"
+            class="pad-link"
+            :class="{ active: activeSection === item.id }"
+            @click="goTo(item.id)"
+          >
+            {{ item.label }}
+          </button>
+        </nav>
+        <div class="pad-card">
+          <p class="pad-card-title">{{ profile.role }}</p>
+          <p class="pad-card-sub">{{ profile.experience }}经验 · {{ age }}岁</p>
+          <p class="pad-card-sub">{{ profile.education }}</p>
+          <a class="pad-mail" :href="`mailto:${profile.email}`">{{ profile.email }}</a>
+        </div>
+        <p class="pad-foot">更新于 {{ profile.lastUpdated }}</p>
+      </aside>
+
+      <main class="sheet">
+        <span class="tape tape-top" aria-hidden="true"></span>
+
+        <header class="hero">
+          <figure class="photo">
+            <img :src="profile.avatar" :alt="profile.name" width="96" height="96" />
+          </figure>
+          <div class="hero-body">
+            <h1 class="name">{{ profile.name }}</h1>
+            <p class="role">{{ profile.role }} · {{ profile.gender }} · {{ age }}岁</p>
+            <p class="meta">{{ profile.education }} · {{ profile.experience }}经验 · {{ profile.email }}</p>
+          </div>
+        </header>
+
         <section id="about" class="block">
           <h2>个人介绍</h2>
           <div class="prose">
@@ -28,68 +56,55 @@
         </section>
 
         <section id="skills" class="block">
-          <h2>技能</h2>
-          <ul class="skill-list">
-            <li v-for="group in skillGroups" :key="group.category" class="skill-row">
-              <strong class="skill-category">{{ group.category }}</strong>
-              <span class="skill-items">
-                <template v-for="(item, index) in group.items" :key="item.name">
-                  <span v-if="index > 0" class="skill-sep" aria-hidden="true">·</span>
-                  <span class="skill-item">
-                    <img v-if="!item.color" class="skill-icon" :src="item.src" alt="" aria-hidden="true" />
-                    <span v-else class="skill-icon" :style="[maskStyle(item.src), { '--icon': iconColor(item) }]"></span>
-                    {{ item.name }}
-                  </span>
-                </template>
-              </span>
-            </li>
-          </ul>
+          <h2>技能 <span class="h2-en">{{ totalSkills }} 项</span></h2>
+          <div class="skill-stack">
+            <div v-for="group in skillGroups" :key="group.category" class="skill-group">
+              <p class="skill-category">{{ group.category }}</p>
+              <ul class="sticker-list">
+                <li v-for="item in group.items" :key="item.name" class="sticker">
+                  <img v-if="!item.color" class="sticker-icon" :src="item.src" alt="" aria-hidden="true" />
+                  <span v-else class="sticker-mask" :style="[maskStyle(item.src), { background: iconColor(item) }]" aria-hidden="true"></span>
+                  {{ item.name }}
+                </li>
+              </ul>
+            </div>
+          </div>
         </section>
 
         <section id="projects" class="block">
-          <h2>项目</h2>
+          <h2>项目 <span class="h2-en">{{ allProjects.length }} 个</span></h2>
           <ul class="project-list">
-            <li v-for="project in allProjects" :key="project.id">
-              <strong>{{ project.title }}</strong>
-              <span>{{ project.summary }}</span>
+            <li v-for="project in allProjects" :key="project.id" class="project-item">
+              <div class="project-head">
+                <strong>{{ project.title }}</strong>
+                <span class="project-period">{{ project.period }}</span>
+              </div>
+              <p v-if="project.subtitle" class="project-sub">{{ project.subtitle }}</p>
+              <p class="project-summary">{{ project.summary }}</p>
+              <ul v-if="project.techStack?.length" class="tags">
+                <li v-for="tech in project.techStack.slice(0, 5)" :key="tech">{{ tech }}</li>
+              </ul>
             </li>
           </ul>
         </section>
-      </main>
 
-      <footer class="foot">
-        <span>更新于 {{ profile.lastUpdated }}</span>
-        <span class="foot-dot" aria-hidden="true"></span>
-        <span>{{ profile.name }}</span>
-      </footer>
+        <footer class="sheet-foot">
+          <span>{{ profile.name }} · {{ profile.lastUpdated }}</span>
+        </footer>
+      </main>
     </div>
 
-    <nav class="rail" aria-label="页面导航">
+    <nav class="mobile-rail" aria-label="页面导航">
       <button
         v-for="item in sections"
         :key="item.id"
         type="button"
-        class="rail-link"
         :class="{ active: activeSection === item.id }"
         @click="goTo(item.id)"
       >
         {{ item.label }}
       </button>
     </nav>
-
-    <button
-      type="button"
-      class="theme-toggle"
-      :aria-label="theme === 'dark' ? '切换到亮色' : '切换到暗色'"
-      @click="toggleTheme"
-    >
-      <svg v-if="theme === 'dark'" viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="currentColor" d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0 4a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1ZM12 4a1 1 0 0 1-1-1V2a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1Zm8 9h1a1 1 0 1 1 0 2h-1a1 1 0 1 1 0-2ZM3 13H2a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2Zm14.66 5.66.7.7a1 1 0 0 1-1.41 1.42l-.7-.71a1 1 0 0 1 1.41-1.41ZM6.34 5.34l-.7-.7A1 1 0 0 1 7.05 3.2l.7.7a1 1 0 1 1-1.41 1.42Zm12.02-1.42.7-.7a1 1 0 1 1 1.42 1.41l-.71.7a1 1 0 0 1-1.41-1.41ZM5.34 17.66l-.7.7a1 1 0 1 1-1.42-1.41l.71-.7a1 1 0 0 1 1.41 1.41Z" />
-      </svg>
-      <svg v-else viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="currentColor" d="M21 14.3A8.4 8.4 0 0 1 9.7 3 8.5 8.5 0 1 0 21 14.3Z" />
-      </svg>
-    </button>
   </div>
 </template>
 
@@ -99,11 +114,11 @@ import { calcAge, profile } from './data/profile.js';
 import { skillGroups } from './data/skills.js';
 import { allProjects } from './data/projects.js';
 import { useTheme } from './composables/useTheme.js';
-import BackgroundCanvas from './components/BackgroundCanvas.vue';
 
 const { theme, toggleTheme } = useTheme();
 const activeSection = ref('about');
 const age = computed(() => calcAge());
+const totalSkills = computed(() => skillGroups.reduce((n, g) => n + g.items.length, 0));
 
 const sections = [
   { id: 'about', label: '介绍' },
@@ -111,20 +126,13 @@ const sections = [
   { id: 'projects', label: '项目' }
 ];
 
-const metaItems = computed(() => [
-  { icon: '/icons/ui-user.svg', text: `${profile.gender} · ${age.value} 岁` },
-  { icon: '/icons/ui-school.svg', text: '本科' },
-  { icon: '/icons/ui-work.svg', text: `${profile.experience}经验` },
-  { icon: '/icons/ui-mail.svg', text: profile.email, href: `mailto:${profile.email}` }
-]);
-
-function maskStyle(src) {
-  return { WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` };
-}
-
 function iconColor(item) {
   if (theme.value === 'dark' && item.darkColor) return item.darkColor;
   return item.color;
+}
+
+function maskStyle(src) {
+  return { WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` };
 }
 
 function goTo(id) {
@@ -132,253 +140,348 @@ function goTo(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+let scrollTicking = false;
+
 function updateActive() {
-  const probe = 140;
+  const probe = 160;
   let current = sections[0].id;
   for (const item of sections) {
     const el = document.getElementById(item.id);
     if (el && el.getBoundingClientRect().top <= probe) current = item.id;
   }
-  activeSection.value = current;
+  if (current !== activeSection.value) activeSection.value = current;
+  scrollTicking = false;
+}
+
+function onScroll() {
+  if (scrollTicking) return;
+  scrollTicking = true;
+  window.requestAnimationFrame(updateActive);
 }
 
 onMounted(() => {
   updateActive();
-  window.addEventListener('scroll', updateActive, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', updateActive);
+  window.removeEventListener('scroll', onScroll);
 });
 </script>
 
 <style scoped>
-.app {
+.desk {
   position: relative;
   min-height: 100vh;
-  min-height: 100dvh;
+  padding: 20px 20px 72px;
 }
 
 .grain {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
-  opacity: var(--grain);
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.55'/></svg>");
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.22'/></svg>");
 }
 
-.shell {
+[data-theme='dark'] .grain {
+  opacity: 0.12;
+}
+
+.theme-fab {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 30;
+  padding: 6px 14px;
+  background: var(--slip);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.theme-fab:hover {
+  background: var(--hi);
+  color: #2a2420;
+}
+
+.layout {
   position: relative;
-  z-index: 2;
-  width: min(720px, calc(100% - 48px));
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 96px 0 104px;
 }
 
-.profile,
-.block,
-.foot {
-  animation: rise 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+.sheet {
+  grid-column: 2;
+  position: relative;
 }
 
-.block:nth-of-type(1) {
-  animation-delay: 0.07s;
+.pad {
+  position: fixed;
+  top: 20px;
+  left: max(20px, calc(50% - 480px));
+  width: 220px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 27px, color-mix(in srgb, var(--rule-blue) 38%, transparent) 27px 28px),
+    var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 5px 15px 6px 17px;
+  box-shadow: var(--shadow-card);
+  padding: 40px 16px 16px;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-.block:nth-of-type(2) {
-  animation-delay: 0.14s;
+.clip {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%) rotate(2deg);
 }
 
-.block:nth-of-type(3) {
-  animation-delay: 0.21s;
+.clip-body {
+  display: block;
+  width: 44px;
+  height: 30px;
+  background: #2f2b27;
+  border: 2px solid #141210;
+  border-radius: 6px 6px 10px 10px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25);
 }
 
-.foot {
-  animation-delay: 0.28s;
+[data-theme='dark'] .clip-body {
+  background: #141210;
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
+.clip-top {
+  display: block;
+  width: 26px;
+  height: 12px;
+  margin: 0 auto -4px;
+  background: #57534e;
+  border: 2px solid #141210;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
 }
 
-.profile {
+.pad-kicker {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.pad-nav {
+  display: grid;
+  gap: 4px;
+}
+
+.pad-link {
+  padding: 8px 10px;
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.pad-link:hover {
+  border-color: var(--pencil);
+}
+
+.pad-link.active {
+  background: var(--hi);
+  border-color: var(--ink);
+  color: #2a2420;
+}
+
+.pad-card {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1.5px dashed var(--pencil);
+}
+
+.pad-card-title {
+  font-weight: 700;
+}
+
+.pad-card-sub {
+  font-size: 0.83rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.pad-mail {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--link);
+  word-break: break-all;
+}
+
+.pad-foot {
+  margin-top: 12px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.sheet {
+  position: relative;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow-paper);
+  padding: 40px 36px 28px;
+}
+
+.tape {
+  position: absolute;
+  width: 110px;
+  height: 26px;
+  background: var(--tape);
+  border-left: 2px dashed rgba(42, 36, 32, 0.15);
+  border-right: 2px dashed rgba(42, 36, 32, 0.15);
+}
+
+.tape-top {
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+}
+
+.hero {
   display: flex;
+  gap: 20px;
   align-items: center;
-  gap: 26px;
-  margin-bottom: 72px;
+  margin-bottom: 8px;
 }
 
-.avatar {
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  object-fit: cover;
+.photo {
+  position: relative;
   flex-shrink: 0;
-  background: var(--chip);
-  box-shadow: 0 0 0 5px var(--ring), 0 12px 32px rgba(13, 43, 64, 0.12);
+  background: var(--photo);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px 3px 9px 4px;
+  padding: 6px;
+  transform: rotate(-2.5deg);
+  transition: transform 0.3s ease;
 }
 
-.profile-body {
-  min-width: 0;
-  flex: 1;
+.photo:hover {
+  transform: rotate(-2.5deg) translateY(-2px);
+}
+
+.photo img {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
 .name {
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 1.9rem;
   line-height: 1.2;
+  letter-spacing: 0.04em;
 }
 
 .role {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 0.95rem;
+  margin-top: 4px;
+  color: var(--ink-soft);
 }
 
 .meta {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 7px 30px;
-  list-style: none;
-  margin-top: 18px;
+  margin-top: 8px;
+  font-size: 0.86rem;
   color: var(--muted);
   font-family: var(--font-sans);
-  font-size: 0.84rem;
-}
-
-.meta li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.meta-icon {
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-  background: currentColor;
-  opacity: 0.7;
-}
-
-.meta a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-}
-
-.meta a:hover {
-  color: var(--accent);
-  border-bottom-color: currentColor;
-}
-
-.main {
-  min-width: 0;
 }
 
 .block {
-  scroll-margin-top: 40px;
-  padding-bottom: 64px;
+  scroll-margin-top: 90px;
+  padding: 26px 0 6px;
 }
 
-h2 {
+.block h2 {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
-  margin-bottom: 22px;
-  color: var(--muted);
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.h2-en {
   font-family: var(--font-sans);
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-}
-
-h2::before {
-  content: '';
-  width: 18px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--accent);
-}
-
-.prose {
-  max-width: 34em;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--muted);
 }
 
 .prose p {
-  font-size: 1.06rem;
-  line-height: 1.95;
+  font-size: 1.02rem;
+  line-height: 1.9;
 }
 
 .prose p + p {
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
-.skill-list {
-  list-style: none;
-  margin-left: -12px;
-}
-
-.skill-row {
+.skill-stack {
   display: grid;
-  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
-  gap: 4px 22px;
-  align-items: baseline;
-  padding: 11px 12px;
-  border-radius: 10px;
-  transition: background 0.2s ease;
-}
-
-.skill-row:hover {
-  background: var(--chip);
+  gap: 18px;
+  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
 }
 
 .skill-category {
-  font-size: 0.98rem;
-  font-weight: 650;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-.skill-items {
+.sticker-list {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  color: var(--muted);
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  line-height: 1.7;
+  gap: 10px;
+  list-style: none;
 }
 
-.skill-item {
+.sticker {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  padding: 7px 14px;
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+  border: 0;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  color: var(--ink);
 }
 
-.skill-sep {
-  margin: 0 8px;
-  opacity: 0.45;
-}
-
-.skill-icon {
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-  background: var(--icon);
-}
-
-img.skill-icon {
-  background: none;
+.sticker-icon {
+  width: 17px;
+  height: 17px;
   object-fit: contain;
 }
 
-.meta-icon,
-.skill-icon {
+.sticker-mask {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -388,205 +491,142 @@ img.skill-icon {
 }
 
 .project-list {
-  list-style: none;
-  margin-left: -12px;
-}
-
-.project-list li {
   display: grid;
-  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
-  gap: 4px 22px;
-  align-items: baseline;
-  padding: 11px 12px;
-  border-radius: 10px;
-  transition: background 0.2s ease;
-}
-
-.project-list li:hover {
-  background: var(--chip);
-}
-
-.project-list strong {
-  font-size: 0.98rem;
-  font-weight: 650;
-}
-
-.project-list span {
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.7;
-}
-
-.foot {
-  display: flex;
-  align-items: center;
   gap: 12px;
+  list-style: none;
+}
+
+.project-item {
+  background: var(--slip);
+  border: 1.5px solid var(--ink);
+  border-radius: 14px 5px 15px 6px;
+  padding: 16px 18px;
+}
+
+.project-item:hover {
+  background: var(--card);
+}
+
+.project-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.project-period {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.project-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.project-summary {
+  font-size: 0.92rem;
+  line-height: 1.7;
   margin-top: 8px;
-  padding-top: 22px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
+  color: var(--ink-soft);
 }
 
-.foot-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.5;
-}
-
-.rail {
-  position: fixed;
-  top: 50%;
-  left: calc(50% + 360px + 56px);
-  z-index: 30;
-  transform: translateY(-50%);
+.tags {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin-top: 10px;
 }
 
-.rail-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--muted);
+.tags li {
   font-family: var(--font-sans);
-  font-size: 0.8rem;
-  letter-spacing: 0.16em;
-  cursor: pointer;
-  transition: color 0.25s ease;
+  font-size: 0.7rem;
+  padding: 2px 9px;
+  border: 1px solid var(--pencil);
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
 }
 
-.rail-link::before {
-  content: '';
-  width: 14px;
-  height: 1.5px;
-  border-radius: 2px;
-  background: currentColor;
-  opacity: 0.45;
-  transition: width 0.25s ease, opacity 0.25s ease, background 0.25s ease;
+.sheet-foot {
+  margin-top: 28px;
+  padding-top: 14px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--muted);
+  border-top: 1.5px dashed var(--pencil);
 }
 
-.rail-link:hover {
-  color: var(--ink);
+.mobile-rail {
+  display: none;
 }
 
-.rail-link.active {
-  color: var(--ink);
-}
-
-.rail-link.active::before {
-  width: 30px;
-  opacity: 1;
-  background: var(--accent);
-}
-
-.theme-toggle {
-  position: fixed;
-  top: 22px;
-  right: 22px;
-  z-index: 30;
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--chip);
-  backdrop-filter: blur(8px);
-  color: var(--ink);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.theme-toggle:hover {
-  transform: translateY(-1px);
-}
-
-.theme-toggle svg {
-  width: 16px;
-  height: 16px;
-}
-
-@media (max-width: 1180px) {
-  .shell {
-    width: min(720px, calc(100% - 40px));
-    padding: 64px 0 108px;
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
   }
 
-  .rail {
+  .pad {
+    position: static;
     left: auto;
-    right: 20px;
-    top: auto;
-    bottom: 20px;
-    transform: none;
-    flex-direction: row;
-    align-items: center;
-    gap: 18px;
-    padding: 9px 16px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--chip);
-    backdrop-filter: blur(10px);
+    width: auto;
+    max-height: none;
   }
 
-  .rail-link {
-    letter-spacing: 0.1em;
+  .sheet {
+    grid-column: auto;
+    padding: 32px 20px 24px;
   }
 
-  .rail-link::before {
-    display: none;
-  }
-
-  .rail-link.active {
-    color: var(--accent);
-    font-weight: 650;
-  }
-}
-
-@media (max-width: 560px) {
-  .profile {
-    gap: 18px;
-    margin-bottom: 52px;
-  }
-
-  .avatar {
+  .photo img {
     width: 72px;
     height: 72px;
   }
 
   .name {
-    font-size: 1.35rem;
+    font-size: 1.5rem;
   }
 
-  .meta {
-    grid-template-columns: 1fr;
-    gap: 7px;
+  .mobile-rail {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    z-index: 30;
+    transform: translateX(-50%) translateZ(0);
+    backface-visibility: hidden;
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    background: var(--slip);
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    box-shadow: var(--shadow-card);
   }
 
-  .block {
-    padding-bottom: 48px;
+  .mobile-rail button {
+    border: 0;
+    background: transparent;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    cursor: pointer;
   }
 
-  .skill-row,
-  .project-list li {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
+  .mobile-rail button.active {
+    background: var(--hi);
+    color: #2a2420;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .profile,
-  .block,
-  .foot {
-    animation: none;
+  * {
+    transition: none !important;
+    animation: none !important;
   }
 }
 </style>

@@ -1,31 +1,54 @@
+/* Looseleaf 纸感手绘主题：绿桌布 + 米纸 + 墨水 + 荧光笔 */
+
 :root,
 [data-theme='light'] {
-  /* Latin first, so CJK falls through to the platform's Chinese face. */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'HarmonyOS Sans SC',
-    'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
-  /* Reading text; small tracked-out labels stay on --font-sans. */
-  --font-kai: 'LXGW WenKai', var(--font-sans);
-  --bg: #e4f3fd;
-  --bg-2: #f6fcff;
-  --ink: #0d2b40;
-  --muted: #55788f;
-  --line: rgba(13, 43, 64, 0.14);
-  --accent: #0086cc;
-  --chip: rgba(255, 255, 255, 0.7);
-  --ring: rgba(255, 255, 255, 0.6);
-  --grain: 0.2;
+  --font-hand: 'LXGW WenKai', 'Bradley Hand', 'Segoe Print', 'Kevin Sans Hand', cursive;
+  --font-sans: ui-monospace, 'Cascadia Code', 'IBM Plex Mono', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+
+  --desk: #a8c8bb;
+  --desk-deep: #93b4a7;
+  --paper: #f8f5ee;
+  --card: #fbf6e9;
+  --slip: #fbf8f1;
+  --photo: #fffdf6;
+  --ink: #2a2420;
+  --ink-soft: #4a433c;
+  --muted: #5a554e;
+  --pencil: #8e887f;
+  --rule-blue: #b2c3dc;
+  --hi: #f8dc4c;
+  --link: #2c4f9e;
+  --red: #c2412d;
+  --green: #3b7a4b;
+  --orange: #df6b3c;
+  --sky: #4aa8e8;
+  --tape: rgba(246, 244, 236, 0.82);
+  --dot: rgba(42, 36, 32, 0.16);
+
+  --border: 2px solid var(--ink);
+  --shadow-paper: 0 1px 1.5px rgba(58, 44, 30, 0.2), 0 12px 22px -8px rgba(58, 44, 30, 0.28);
+  --shadow-card: 0 1px 1.5px rgba(58, 44, 30, 0.2), 0 6px 11px -5px rgba(58, 44, 30, 0.26);
+  --shadow-press: 1px 1px 0 var(--ink);
 }
 
 [data-theme='dark'] {
-  --bg: #08192a;
-  --bg-2: #0e2c46;
-  --ink: #e6f3fb;
-  --muted: #8db0c8;
-  --line: rgba(230, 243, 251, 0.14);
-  --accent: #5cc9f5;
-  --chip: rgba(255, 255, 255, 0.07);
-  --ring: rgba(255, 255, 255, 0.1);
-  --grain: 0.14;
+  --desk: #202825;
+  --desk-deep: #1a2120;
+  --paper: #2e2a25;
+  --card: #38322b;
+  --slip: #332e28;
+  --photo: #3a352e;
+  --ink: #f3ece0;
+  --ink-soft: #d8cfc1;
+  --muted: #b3a898;
+  --pencil: #8a8177;
+  --rule-blue: #4a5a72;
+  --hi: #f8dc4c;
+  --link: #9db8ff;
+  --tape: rgba(214, 206, 188, 0.18);
+  --dot: rgba(243, 236, 224, 0.16);
+  --border: 2px solid var(--ink);
 }
 
 * {
@@ -41,32 +64,33 @@ body,
 }
 
 html {
-  background: var(--bg);
-  color: var(--ink);
-  scroll-behavior: smooth;
+  background: var(--desk);
 }
 
 body {
-  font-family: var(--font-kai);
+  font-family: var(--font-hand);
   line-height: 1.7;
-  background: linear-gradient(180deg, var(--bg-2), var(--bg) 62%);
   color: var(--ink);
-  font-variant-numeric: tabular-nums;
+  background:
+    radial-gradient(ellipse 120% 100% at 50% 40%, transparent 60%, rgba(58, 44, 30, 0.22)),
+    var(--desk);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: var(--accent);
-  text-underline-offset: 3px;
+[data-theme='dark'] body {
+  background:
+    radial-gradient(ellipse 120% 100% at 50% 40%, transparent 60%, rgba(0, 0, 0, 0.35)),
+    var(--desk);
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  background: var(--hi);
+  color: #2a2420;
 }
 
 button {
   font-family: inherit;
+  color: inherit;
 }
 
 img {
@@ -74,10 +98,10 @@ img {
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--ink) 22%, transparent);
+  background: var(--ink);
   border-radius: 999px;
+  border: 2px solid var(--desk);
 }
